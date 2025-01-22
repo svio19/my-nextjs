@@ -1,0 +1,13 @@
+
+{
+  "name": "nextjs-app",
+  "type": "nodejs",
+  "buildPack": "nodejs",
+  "dockerfilePath": "./Dockerfile",
+  "deploymentType": "docker",
+  "port": 3000,
+  "env": {
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_API_URL": "${API_URL}"
+  }
+}
