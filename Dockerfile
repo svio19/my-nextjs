@@ -1,23 +1,26 @@
-# Dockerfile optimized for Coolify
-FROM node:18-alpine AS base
+# Dockerfile
+FROM node:20-alpine AS builder
 
-FROM base AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
-
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+RUN npm install
 COPY . .
 RUN npm run build
 
-FROM base AS runner
+# Production image, copy all the files and run next
+FROM node:20-alpine AS runner
+
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
 
+# Copy built assets from builder
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/public ./public
+
+# Expose the port
 EXPOSE 3000
-CMD ["node", "server.js"]
+
+# Start the application
+CMD ["npm", "start"]
