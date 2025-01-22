@@ -1,18 +1,20 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 
-// Check if API key exists
-if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY is not set in environment variables');
-  }
-  
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 export async function POST(req: Request) {
   try {
+    // Check for API key at runtime
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json(
+        { error: 'API key not configured' },
+        { status: 500 }
+      );
+    }
+
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+
     const { message } = await req.json();
 
     if (!message) {
@@ -28,7 +30,6 @@ export async function POST(req: Request) {
       model: 'claude-3-opus-20240229',
     });
 
-    // Check if there's content and it's of type text
     const messageContent = completion.content[0].type === 'text' 
       ? completion.content[0].text 
       : 'No response generated';
