@@ -12,12 +12,14 @@ export async function POST(req: Request) {
     const { message } = await req.json();
 
     if (!message) {
-      console.log({
+      const errorLog = {
         timestamp: new Date().toISOString(),
         status: 'error',
-        error: 'Message is required',
+        errorType: 'ValidationError',
+        message: 'Message is required',
         requestData: { message }
-      });
+      };
+      console.error(JSON.stringify(errorLog));
 
       return NextResponse.json(
         { error: 'Message is required' },
@@ -25,7 +27,7 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log({
+    const requestLog = {
       timestamp: new Date().toISOString(),
       status: 'request',
       requestData: {
@@ -33,7 +35,8 @@ export async function POST(req: Request) {
         model: 'claude-3-opus-20240229',
         max_tokens: 1000
       }
-    });
+    };
+    console.log(JSON.stringify(requestLog));
 
     const completion = await anthropic.messages.create({
       max_tokens: 1000,
@@ -47,7 +50,7 @@ export async function POST(req: Request) {
 
     const endTime = Date.now();
     
-    console.log({
+    const successLog = {
       timestamp: new Date().toISOString(),
       status: 'success',
       requestData: {
@@ -55,27 +58,30 @@ export async function POST(req: Request) {
         model: completion.model
       },
       responseData: {
-        content: messageContent,
+        content: messageContent.slice(0, 200), // Truncate long responses
         usage: completion.usage,
         latency: endTime - startTime,
         id: completion.id,
         role: completion.role,
         model: completion.model
       }
-    });
+    };
+    console.log(JSON.stringify(successLog));
 
     return NextResponse.json({
       response: messageContent,
     });
 
   } catch (error) {
-    console.log({
+    const errorLog = {
       timestamp: new Date().toISOString(),
       status: 'error',
-      error: {
-        
-      },
-    });
+      errorType: error instanceof Error ? error.name : 'UnknownError',
+      message: error instanceof Error ? error.message : 'An unknown error occurred',
+      stack: error instanceof Error ? error.stack : null,
+      requestData: { message: req.body ? await req.json().message : 'N/A' }
+    };
+    console.error(JSON.stringify(errorLog));
 
     return NextResponse.json(
       { error: 'Failed to process request' },
