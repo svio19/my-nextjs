@@ -73,11 +73,8 @@ export async function POST(req: Request) {
       timestamp: new Date().toISOString(),
       status: 'error',
       error: {
-        message: error.message,
-        name: error.name,
-        stack: error.stack
+        
       },
-      requestData: { message }
     });
 
     return NextResponse.json(
