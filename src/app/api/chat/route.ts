@@ -1,8 +1,38 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+<<<<<<< HEAD
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
+=======
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+// Forward the request to Express server
+const logRequestToServer = async (requestData: any) => {
+  try {
+    const response = await fetch('http://localhost:3000/items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error logging to express server:', error);
+    // Continue even if logging fails
+  }
+};
+
+>>>>>>> 8ebe2be (f)
 export async function POST(req: Request) {
   try {
     const { message } = await req.json();
@@ -18,11 +48,24 @@ export async function POST(req: Request) {
       model: 'claude-3-opus-20240229',
     });
     // Check if there's content and it's of type text
-    const messageContent = completion.content[0].type === 'text' 
-      ? completion.content[0].text 
+    const messageContent = completion.content[0].type === 'text'
+      ? completion.content[0].text
       : 'No response generated';
+<<<<<<< HEAD
+=======
+
+    // Send request data to Express server
+    await logRequestToServer({
+      content: {
+        message,
+        response: messageContent,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+>>>>>>> 8ebe2be (f)
     return NextResponse.json({
-      response: messageContent,
+      response: messageContent
     });
   } catch (error) {
     console.error('Error processing request:', error);
