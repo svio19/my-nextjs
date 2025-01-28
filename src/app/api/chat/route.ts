@@ -9,7 +9,7 @@ const anthropic = new Anthropic({
 // Forward the request to Express server
 const logRequestToServer = async (requestData: any) => {
   try {
-    const response = await fetch('http://localhost:3000/items', {
+    const response = await fetch('http://kg8k8ggcowwok4gowosk80w4.57.128.175.60.sslip.io/items', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
