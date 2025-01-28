@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-<<<<<<< HEAD
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-=======
+
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -32,7 +28,7 @@ const logRequestToServer = async (requestData: any) => {
   }
 };
 
->>>>>>> 8ebe2be (f)
+
 export async function POST(req: Request) {
   try {
     const { message } = await req.json();
@@ -51,8 +47,7 @@ export async function POST(req: Request) {
     const messageContent = completion.content[0].type === 'text'
       ? completion.content[0].text
       : 'No response generated';
-<<<<<<< HEAD
-=======
+
 
     // Send request data to Express server
     await logRequestToServer({
@@ -63,7 +58,6 @@ export async function POST(req: Request) {
       }
     });
 
->>>>>>> 8ebe2be (f)
     return NextResponse.json({
       response: messageContent
     });
