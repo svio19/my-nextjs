@@ -138,7 +138,7 @@ export default function PrivateChatTab() {
         text: `You said: "${newMessage}". This is a placeholder AI response.`,
         sender: 'ai',
         timestamp: new Date(),
-        pseudonym: 'AI Assistant'
+        pseudonym: 'mtwitt'
       };
 
       const finalUpdatedConversations = updatedConversations.map(conv => {
