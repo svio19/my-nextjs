@@ -1,7 +1,17 @@
 'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { Search, Clock, BookmarkPlus, Share2, Tag, Lightbulb, ChevronLeft, ChevronRight } from 'lucide-react';
+
+// Define interfaces for component props
+interface ResponseCardProps {
+  text: string;
+}
+
+interface SearchPayload {
+  message: string;
+}
 
 const SearchTab = () => {
   const [query, setQuery] = useState('');
@@ -56,7 +66,7 @@ const SearchTab = () => {
     
     try {
       // Create the search payload with query and optional theme
-      const searchPayload = {
+      const searchPayload: SearchPayload = {
         message: theme ? `${query} [Theme focus: ${theme}]` : query,
       };
       
@@ -87,12 +97,12 @@ const SearchTab = () => {
     }
   };
 
-  const handleRecommendationClick = (recommendation) => {
+  const handleRecommendationClick = (recommendation: string) => {
     setQuery(recommendation);
   };
 
-  // Fixed ResponseCard function component without TypeScript errors
-  const ResponseCard = ({ text }) => (
+  // Fixed ResponseCard function component with proper TypeScript interface
+  const ResponseCard = ({ text }: ResponseCardProps) => (
     <div className="bg-white rounded-lg shadow-md p-4">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">Response</h3>
