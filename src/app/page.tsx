@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use client';
 
 import React, { useState } from 'react';
@@ -119,6 +120,25 @@ export default function Home() {
             )}
           </div>
         );
+=======
+
+'use client';
+
+import React, { useState } from 'react';
+import { Search, Clock, BookmarkPlus, BookOpen, Rss, MessageCircle } from 'lucide-react';
+import JournalTab from './components/JournalTab';
+import ContentFeedTab from './components/ContentFeedTab';
+import PrivateChatTab from './components/PrivateChatTab';
+import SearchTab from './components/SearchTab';
+
+export default function Home() {
+  const [activeTab, setActiveTab] = useState('response');
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'response':
+        return <SearchTab />;
+>>>>>>> master
       case 'history':
         return (
           <p className="text-gray-500 text-center py-8">No search history available</p>
