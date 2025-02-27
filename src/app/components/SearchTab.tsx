@@ -1,7 +1,7 @@
 'use client';
-'use client';
+
 import React, { useState } from 'react';
-import { Search, Clock, BookmarkPlus, Share2, Tag, Lightbulb,ChevronLeft, ChevronRight} from 'lucide-react';
+import { Search, Clock, BookmarkPlus, Share2, Tag, Lightbulb, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const SearchTab = () => {
   const [query, setQuery] = useState('');
@@ -11,9 +11,6 @@ const SearchTab = () => {
   const [error, setError] = useState('');
   const [showThemeInput, setShowThemeInput] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-
-
-  
 
   // Sample recommendation requests - now shorter
   const recommendations = [
@@ -47,7 +44,6 @@ const SearchTab = () => {
     'Would you rather questions for friends',
     'What music matches my current mood?'
   ];
-
 
   const handleSearch = async () => {
     if (!query.trim()) {
@@ -91,14 +87,11 @@ const SearchTab = () => {
     }
   };
 
-
-
-  
-
   const handleRecommendationClick = (recommendation) => {
     setQuery(recommendation);
   };
 
+  // Fixed ResponseCard function component without TypeScript errors
   const ResponseCard = ({ text }) => (
     <div className="bg-white rounded-lg shadow-md p-4">
       <div className="flex justify-between items-center mb-4">
@@ -180,51 +173,51 @@ const SearchTab = () => {
           )}
         </div>
 
-        {/* Subtle recommendation section */}
-<div className="mt-1 mb-3">
-  <div className="flex items-center justify-between mb-1">
-    <div className="flex items-center gap-1">
-      <Lightbulb size={12} className="text-amber-500" />
-      <span className="text-xs text-gray-500">Try:</span>
-    </div>
-    <div className="flex items-center gap-1">
-      {Array.from({ length: Math.ceil(recommendations.length / 5) }).map((_, index) => (
-        <button
-          key={index}
-          onClick={() => setCurrentPage(index)}
-          className={`w-1.5 h-1.5 rounded-full transition-colors ${
-            currentPage === index ? 'bg-amber-500' : 'bg-gray-200'
-          }`}
-        />
-      ))}
-    </div>
-  </div>
-  <div className="flex flex-wrap gap-1">
-    {recommendations.slice(currentPage * 5, (currentPage + 1) * 5).map((rec, index) => (
-      <button
-        key={index}
-        onClick={() => handleRecommendationClick(rec)}
-        className="text-xs bg-gray-50 hover:bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full transition-colors"
-      >
-        {rec}
-      </button>
-    ))}
-  </div>
-  <div className="flex justify-between mt-1">
-    <button
-      onClick={() => setCurrentPage(prev => (prev > 0 ? prev - 1 : Math.ceil(recommendations.length / 5) - 1))}
-      className="text-xs text-gray-400 hover:text-gray-600"
-    >
-      <ChevronLeft size={14} />
-    </button>
-    <button
-      onClick={() => setCurrentPage(prev => (prev < Math.ceil(recommendations.length / 5) - 1 ? prev + 1 : 0))}
-      className="text-xs text-gray-400 hover:text-gray-600"
-    >
-      <ChevronRight size={14} />
-    </button>
-  </div>
-</div>
+        {/* Recommendations section */}
+        <div className="mt-1 mb-3">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-1">
+              <Lightbulb size={12} className="text-amber-500" />
+              <span className="text-xs text-gray-500">Try:</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.ceil(recommendations.length / 5) }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentPage(index)}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                    currentPage === index ? 'bg-amber-500' : 'bg-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {recommendations.slice(currentPage * 5, (currentPage + 1) * 5).map((rec, index) => (
+              <button
+                key={index}
+                onClick={() => handleRecommendationClick(rec)}
+                className="text-xs bg-gray-50 hover:bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full transition-colors"
+              >
+                {rec}
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-between mt-1">
+            <button
+              onClick={() => setCurrentPage(prev => (prev > 0 ? prev - 1 : Math.ceil(recommendations.length / 5) - 1))}
+              className="text-xs text-gray-400 hover:text-gray-600"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <button
+              onClick={() => setCurrentPage(prev => (prev < Math.ceil(recommendations.length / 5) - 1 ? prev + 1 : 0))}
+              className="text-xs text-gray-400 hover:text-gray-600"
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {error && (
