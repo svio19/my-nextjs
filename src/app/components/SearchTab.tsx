@@ -1,8 +1,8 @@
 'use client';
 'use client';
 
-import React, { useState } from 'react';
-import { Search, Clock, BookmarkPlus, Share2, Tag, Lightbulb } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Clock, BookmarkPlus, Share2, Tag, Lightbulb, Lock, Unlock } from 'lucide-react';
 import RecommendationsCarousel from './RecommendationsCarousel';
 
 // Define interfaces for component props
@@ -14,6 +14,13 @@ interface SearchPayload {
   message: string;
 }
 
+// Interface pour le statut premium
+interface PremiumStatus {
+  isPremium: boolean;
+  requestsLimit: number;
+  requestsCount: number;
+}
+
 const SearchTab = () => {
   const [query, setQuery] = useState('');
   const [theme, setTheme] = useState('');
@@ -22,12 +29,43 @@ const SearchTab = () => {
   const [error, setError] = useState('');
   const [showThemeInput, setShowThemeInput] = useState(false);
   const [lastQuery, setLastQuery] = useState('');
+  
+  // État pour gérer le compte des requêtes et le statut premium
+  const [premiumStatus, setPremiumStatus] = useState<PremiumStatus>({
+    isPremium: false,
+    requestsLimit: 5,
+    requestsCount: 0
+  });
+  
+  // État pour la modal du code premium
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [premiumCode, setPremiumCode] = useState('');
+
+  // Charger le compteur de requêtes du localStorage au démarrage
+  useEffect(() => {
+    const savedPremiumStatus = localStorage.getItem('premiumStatus');
+    if (savedPremiumStatus) {
+      setPremiumStatus(JSON.parse(savedPremiumStatus));
+    }
+  }, []);
+
+  // Sauvegarder les changements du statut premium dans le localStorage
+  useEffect(() => {
+    localStorage.setItem('premiumStatus', JSON.stringify(premiumStatus));
+  }, [premiumStatus]);
 
   const handleSearch = async () => {
     if (!query.trim()) {
       setError('Please enter a search term');
       return;
     }
+    
+    // Vérifier si l'utilisateur peut effectuer la recherche
+    if (!premiumStatus.isPremium && premiumStatus.requestsCount >= premiumStatus.requestsLimit) {
+      setShowPremiumModal(true);
+      return;
+    }
+    
     setLoading(true);
     setError('');
     setResponse('');
@@ -55,6 +93,14 @@ const SearchTab = () => {
       
       const data = await res.json();
       setResponse(data.response);
+      
+      // Incrémenter le compteur de requêtes si l'utilisateur n'est pas premium
+      if (!premiumStatus.isPremium) {
+        setPremiumStatus(prev => ({
+          ...prev,
+          requestsCount: prev.requestsCount + 1
+        }));
+      }
     } catch (err) {
       console.error('Search error:', err);
       if (err instanceof Error) {
@@ -69,6 +115,31 @@ const SearchTab = () => {
 
   const handleRecommendationClick = (recommendation: string) => {
     setQuery(recommendation);
+  };
+
+  // Valider le code premium
+  const handlePremiumCodeSubmit = () => {
+    // Code premium de démonstration: "PREMIUM123"
+    if (premiumCode === "PREMIUM123") {
+      setPremiumStatus({
+        isPremium: true,
+        requestsLimit: Infinity,
+        requestsCount: 0
+      });
+      setShowPremiumModal(false);
+      setError('');
+    } else {
+      setError('Code premium invalide');
+    }
+  };
+
+  // Fonction pour réinitialiser le statut premium (pour les tests)
+  const resetPremiumStatus = () => {
+    setPremiumStatus({
+      isPremium: false,
+      requestsLimit: 5,
+      requestsCount: 0
+    });
   };
 
   // ResponseCard component
@@ -98,8 +169,81 @@ const SearchTab = () => {
     </div>
   );
 
+  // Modal pour le code premium
+  const PremiumModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <h3 className="text-xl font-bold mb-4">Accès Premium Requis</h3>
+        <p className="mb-4">Vous avez atteint votre limite de {premiumStatus.requestsLimit} recherches. Entrez un code premium pour continuer.</p>
+        
+        <input
+          type="text"
+          value={premiumCode}
+          onChange={(e) => setPremiumCode(e.target.value)}
+          placeholder="Entrez votre code premium"
+          className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+        />
+        
+        <div className="flex justify-end space-x-2">
+          <button 
+            onClick={() => setShowPremiumModal(false)}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+          >
+            Annuler
+          </button>
+          <button 
+            onClick={handlePremiumCodeSubmit}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            Valider
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Indicateur du statut premium et compteur de requêtes */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center">
+          {premiumStatus.isPremium ? (
+            <span className="flex items-center text-green-600 bg-green-100 px-2 py-1 rounded text-sm">
+              <Unlock size={14} className="mr-1" />
+              Accès Premium
+            </span>
+          ) : (
+            <span className="flex items-center text-gray-600 bg-gray-100 px-2 py-1 rounded text-sm">
+              <span className="font-medium mr-1">
+                {premiumStatus.requestsCount}/{premiumStatus.requestsLimit}
+              </span>
+              recherches restantes
+            </span>
+          )}
+        </div>
+        
+        {/* Bouton pour devenir premium */}
+        {!premiumStatus.isPremium && (
+          <button 
+            onClick={() => setShowPremiumModal(true)}
+            className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+          >
+            <Lock size={14} className="mr-1" />
+            Accès Premium
+          </button>
+        )}
+        
+        {/* Bouton de réinitialisation (à enlever en production) */}
+        {process.env.NODE_ENV === 'development' && (
+          <button 
+            onClick={resetPremiumStatus}
+            className="text-xs text-gray-400 hover:text-gray-600"
+          >
+            Réinitialiser (dev only)
+          </button>
+        )}
+      </div>
+
       {/* Main search section with integrated theme toggle */}
       <div className="mb-4">
         <div className="relative">
@@ -173,6 +317,9 @@ const SearchTab = () => {
           <p className="text-sm">Recherchez quelque chose pour voir les résultats</p>
         </div>
       )}
+
+      {/* Modal pour le code premium */}
+      {showPremiumModal && <PremiumModal />}
     </div>
   );
 };

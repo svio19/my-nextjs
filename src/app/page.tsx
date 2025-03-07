@@ -1,15 +1,38 @@
-
 'use client';
 
-import React, { useState } from 'react';
-import { Search, Clock, BookmarkPlus, BookOpen, Rss, MessageCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Clock, BookmarkPlus, BookOpen, Rss, MessageCircle, Shield, Settings } from 'lucide-react';
 import JournalTab from './components/JournalTab';
 import ContentFeedTab from './components/ContentFeedTab';
 import PrivateChatTab from './components/PrivateChatTab';
 import SearchTab from './components/SearchTab';
+import PrivacyPolicyModal from './components/PrivacyPolicyModal';
+import CookieConsent from './components/CookieConsent';
+import Head from 'next/head';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('response');
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [cookieConsent, setCookieConsent] = useState(false);
+  
+  // Vérifiez si l'utilisateur a déjà accepté les cookies
+  useEffect(() => {
+    const savedConsent = localStorage.getItem('cookieConsent');
+    if (savedConsent) {
+      setCookieConsent(JSON.parse(savedConsent));
+    }
+  }, []);
+
+  const handleCookieConsent = (accepted) => {
+    setCookieConsent(accepted);
+    localStorage.setItem('cookieConsent', JSON.stringify(accepted));
+    
+    // Si l'utilisateur a accepté, vous pouvez initialiser vos services d'analyse, etc.
+    if (accepted) {
+      // Initialiser les services d'analyse ou autres cookies
+      console.log('Cookies acceptés, initialisation des services');
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -29,42 +52,123 @@ export default function Home() {
         return <ContentFeedTab />;
       case 'chat':
         return <PrivateChatTab />;
+      case 'privacy':
+        return (
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-2xl font-bold mb-4">Privacy Settings</h2>
+            <p className="mb-4">Manage how your data is collected and used.</p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">Essential Cookies</h3>
+                  <p className="text-sm text-gray-500">Required for basic functionality</p>
+                </div>
+                <div className="bg-gray-200 px-2 py-1 rounded text-xs">Required</div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">Analytics</h3>
+                  <p className="text-sm text-gray-500">Help us improve our service</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" checked={cookieConsent} onChange={(e) => handleCookieConsent(e.target.checked)} />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        );
       default:
         return null;
     }
   };
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">mtwitt</h1>
+    <>
+      <Head>
+        <title>mtwitt - Your Digital Companion</title>
+        <meta name="description" content="mtwitt helps you search, save, and share content that matters to you." />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#3b82f6" />
+      </Head>
 
-      <div className="flex gap-4 mb-6 overflow-x-auto">
-        {[
-          { key: 'response', icon: Search, label: 'Search' },
-          { key: 'history', icon: Clock, label: 'History' },
-          { key: 'saved', icon: BookmarkPlus, label: 'Saved' },
-          { key: 'journal', icon: BookOpen, label: 'Journal' },
-          { key: 'content', icon: Rss, label: 'Content' },
-          { key: 'chat', icon: MessageCircle, label: 'Chat' }
-        ].map((tab) => (
-          <button
-            key={tab.key}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-              activeTab === tab.key
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-            onClick={() => setActiveTab(tab.key)}
-          >
-            <tab.icon size={16} />
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <main className="container mx-auto px-4 py-8">
+        <header className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">mtwitt</h1>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setActiveTab('privacy')}
+              className={`p-2 rounded-full ${activeTab === 'privacy' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              aria-label="Privacy Settings"
+            >
+              <Shield size={18} />
+            </button>
+            <button 
+              className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
+              aria-label="Settings"
+            >
+              <Settings size={18} />
+            </button>
+          </div>
+        </header>
 
-      <div>
-        {renderTabContent()}
-      </div>
-    </main>
+        <div className="flex gap-4 mb-6 overflow-x-auto">
+          {[
+            { key: 'response', icon: Search, label: 'Search' },
+            { key: 'history', icon: Clock, label: 'History' },
+            { key: 'saved', icon: BookmarkPlus, label: 'Saved' },
+            { key: 'journal', icon: BookOpen, label: 'Journal' },
+            { key: 'content', icon: Rss, label: 'Content' },
+            { key: 'chat', icon: MessageCircle, label: 'Chat' }
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                activeTab === tab.key
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              onClick={() => setActiveTab(tab.key)}
+              aria-current={activeTab === tab.key ? 'page' : undefined}
+            >
+              <tab.icon size={16} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div>
+          {renderTabContent()}
+        </div>
+
+        <footer className="mt-12 pt-6 border-t border-gray-200">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+              <p className="text-gray-500 text-sm">&copy; {new Date().getFullYear()} mtwitt. All rights reserved.</p>
+            </div>
+            <div className="flex gap-4">
+              <button 
+                className="text-gray-500 text-sm hover:text-blue-500"
+                onClick={() => setShowPrivacyModal(true)}
+              >
+                Privacy Policy
+              </button>
+              <a href="#terms" className="text-gray-500 text-sm hover:text-blue-500">Terms of Service</a>
+              <a href="#contact" className="text-gray-500 text-sm hover:text-blue-500">Contact Us</a>
+            </div>
+          </div>
+        </footer>
+      </main>
+
+      {/* Modal pour la politique de confidentialité */}
+      {showPrivacyModal && (
+        <PrivacyPolicyModal onClose={() => setShowPrivacyModal(false)} />
+      )}
+
+      {/* Bannière de consentement aux cookies */}
+      {!cookieConsent && (
+        <CookieConsent onAccept={() => handleCookieConsent(true)} onDecline={() => handleCookieConsent(false)} />
+      )}
+    </>
   );
 }
