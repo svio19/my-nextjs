@@ -1,11 +1,10 @@
 'use client';
-'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Clock, BookmarkPlus, Share2, Tag, Lightbulb, Lock, Unlock } from 'lucide-react';
+import { Search, Clock, BookmarkPlus, Share2, Tag, Lock, Unlock } from 'lucide-react';
 import RecommendationsCarousel from './RecommendationsCarousel';
 
-// Define interfaces for component props
+// Define interfaces for component props and state
 interface ResponseCardProps {
   text: string;
 }
@@ -14,7 +13,6 @@ interface SearchPayload {
   message: string;
 }
 
-// Interface pour le statut premium
 interface PremiumStatus {
   isPremium: boolean;
   requestsLimit: number;
@@ -30,37 +28,43 @@ const SearchTab = () => {
   const [showThemeInput, setShowThemeInput] = useState(false);
   const [lastQuery, setLastQuery] = useState('');
   
-  // État pour gérer le compte des requêtes et le statut premium
+  // Premium status state management
   const [premiumStatus, setPremiumStatus] = useState<PremiumStatus>({
     isPremium: false,
     requestsLimit: 5,
     requestsCount: 0
   });
   
-  // État pour la modal du code premium
+  // Premium modal state
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [premiumCode, setPremiumCode] = useState('');
 
-  // Charger le compteur de requêtes du localStorage au démarrage
+  // Load premium status from localStorage on component mount
   useEffect(() => {
     const savedPremiumStatus = localStorage.getItem('premiumStatus');
     if (savedPremiumStatus) {
-      setPremiumStatus(JSON.parse(savedPremiumStatus));
+      try {
+        setPremiumStatus(JSON.parse(savedPremiumStatus));
+      } catch (e) {
+        console.error('Failed to parse premium status from localStorage');
+        // Reset to default if parsing fails
+        localStorage.removeItem('premiumStatus');
+      }
     }
   }, []);
 
-  // Sauvegarder les changements du statut premium dans le localStorage
+  // Save premium status changes to localStorage
   useEffect(() => {
     localStorage.setItem('premiumStatus', JSON.stringify(premiumStatus));
   }, [premiumStatus]);
 
   const handleSearch = async () => {
     if (!query.trim()) {
-      setError('Please enter a search term');
+      setError('Veuillez entrer un terme de recherche');
       return;
     }
     
-    // Vérifier si l'utilisateur peut effectuer la recherche
+    // Check if user can perform search
     if (!premiumStatus.isPremium && premiumStatus.requestsCount >= premiumStatus.requestsLimit) {
       setShowPremiumModal(true);
       return;
@@ -71,7 +75,7 @@ const SearchTab = () => {
     setResponse('');
     
     try {
-      // Créer le payload de recherche avec la requête et le thème optionnel
+      // Create search payload with query and optional theme
       const searchPayload: SearchPayload = {
         message: theme ? `${query} [Thème: ${theme}]` : query,
       };
@@ -88,13 +92,13 @@ const SearchTab = () => {
       
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to fetch response');
+        throw new Error(errorData.error || 'Échec de la récupération de la réponse');
       }
       
       const data = await res.json();
       setResponse(data.response);
       
-      // Incrémenter le compteur de requêtes si l'utilisateur n'est pas premium
+      // Increment request counter for non-premium users
       if (!premiumStatus.isPremium) {
         setPremiumStatus(prev => ({
           ...prev,
@@ -106,7 +110,7 @@ const SearchTab = () => {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Failed to fetch response');
+        setError('Échec de la récupération de la réponse');
       }
     } finally {
       setLoading(false);
@@ -117,10 +121,12 @@ const SearchTab = () => {
     setQuery(recommendation);
   };
 
-  // Valider le code premium
+  // Validate premium code
   const handlePremiumCodeSubmit = () => {
-    // Code premium de démonstration: "PREMIUM123"
-    if (premiumCode === "PREMIUM123") {
+    // Demo premium code validation - in production, this would call an API
+    const validCodes = ["PREMIUM123", "DEMO2025", "TEST456"];
+    
+    if (validCodes.includes(premiumCode.trim())) {
       setPremiumStatus({
         isPremium: true,
         requestsLimit: Infinity,
@@ -128,12 +134,13 @@ const SearchTab = () => {
       });
       setShowPremiumModal(false);
       setError('');
+      // Success message could be added here
     } else {
       setError('Code premium invalide');
     }
   };
 
-  // Fonction pour réinitialiser le statut premium (pour les tests)
+  // Reset premium status (for testing)
   const resetPremiumStatus = () => {
     setPremiumStatus({
       isPremium: false,
@@ -150,17 +157,32 @@ const SearchTab = () => {
         <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Claude</span>
       </div>
       <div>
-        <p className="text-gray-600">{text}</p>
+        <p className="text-gray-600 whitespace-pre-line">{text}</p>
         <div className="flex justify-between items-center mt-4">
           <span className="flex items-center text-sm text-gray-500">
             <Clock size={14} className="mr-1" />
             {new Date().toLocaleDateString()}
           </span>
           <div className="space-x-2">
-            <button className="text-gray-500 hover:text-gray-700" aria-label="Bookmark">
+            <button 
+              className="text-gray-500 hover:text-gray-700" 
+              aria-label="Bookmark"
+              onClick={() => window.localStorage.setItem('savedResponse', text)}
+            >
               <BookmarkPlus size={16} />
             </button>
-            <button className="text-gray-500 hover:text-gray-700" aria-label="Share">
+            <button 
+              className="text-gray-500 hover:text-gray-700" 
+              aria-label="Share"
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: 'Réponse de Claude',
+                    text: text,
+                  }).catch(console.error);
+                }
+              }}
+            >
               <Share2 size={16} />
             </button>
           </div>
@@ -169,7 +191,7 @@ const SearchTab = () => {
     </div>
   );
 
-  // Modal pour le code premium
+  // Premium Modal component
   const PremiumModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-white rounded-lg p-6 max-w-md w-full">
@@ -182,6 +204,7 @@ const SearchTab = () => {
           onChange={(e) => setPremiumCode(e.target.value)}
           placeholder="Entrez votre code premium"
           className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+          onKeyPress={(e) => e.key === 'Enter' && handlePremiumCodeSubmit()}
         />
         
         <div className="flex justify-end space-x-2">
@@ -204,7 +227,7 @@ const SearchTab = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Indicateur du statut premium et compteur de requêtes */}
+      {/* Premium status indicator and request counter */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
           {premiumStatus.isPremium ? (
@@ -222,7 +245,7 @@ const SearchTab = () => {
           )}
         </div>
         
-        {/* Bouton pour devenir premium */}
+        {/* Premium button */}
         {!premiumStatus.isPremium && (
           <button 
             onClick={() => setShowPremiumModal(true)}
@@ -233,7 +256,7 @@ const SearchTab = () => {
           </button>
         )}
         
-        {/* Bouton de réinitialisation (à enlever en production) */}
+        {/* Reset button (development only) */}
         {process.env.NODE_ENV === 'development' && (
           <button 
             onClick={resetPremiumStatus}
@@ -258,7 +281,7 @@ const SearchTab = () => {
                 disabled={loading}
                 className="w-full p-2 pl-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
               />
-              {/* Theme toggle button inside the search input */}
+              {/* Theme toggle button */}
               <button 
                 onClick={() => setShowThemeInput(!showThemeInput)}
                 className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 ${theme ? 'text-blue-500' : ''}`}
@@ -318,7 +341,7 @@ const SearchTab = () => {
         </div>
       )}
 
-      {/* Modal pour le code premium */}
+      {/* Premium Modal */}
       {showPremiumModal && <PremiumModal />}
     </div>
   );

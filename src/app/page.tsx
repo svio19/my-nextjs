@@ -10,6 +10,20 @@ import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 import CookieConsent from './components/CookieConsent';
 import Head from 'next/head';
 
+interface cookieConsent {
+  id: string;
+  joinId: string;
+  title: string;
+  messages: Message[];
+  lastActive: Date;
+  isPrivate: boolean;
+  userPseudonym: string;
+}
+
+
+
+
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState('response');
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
