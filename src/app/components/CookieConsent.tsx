@@ -1,105 +1,65 @@
 // components/CookieConsent.jsx
-'use client';
-
 import React, { useState } from 'react';
 
-const CookieConsent = ({ onAccept, onDecline }) => {
+// Define the interface for CookieConsent props
+interface CookieConsentProps {
+  onAccept: () => void;
+  onDecline: () => void;
+}
+
+const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) => {
   const [showDetails, setShowDetails] = useState(false);
   
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-lg">
-      <div className="container mx-auto px-4 py-4">
-        {!showDetails ? (
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex-1">
-              <p className="text-gray-700">
-                We use cookies to enhance your experience on our website. By continuing to browse, you consent to our use of cookies.
+    <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg border-t border-gray-200 z-50">
+      <div className="container mx-auto">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex-1">
+            <h3 className="font-medium text-lg mb-1">Cookie Consent</h3>
+            {!showDetails ? (
+              <p className="text-gray-600 text-sm">
+                We use cookies to enhance your browsing experience, analyze site traffic, and personalize content.
+                <button 
+                  onClick={() => setShowDetails(true)}
+                  className="text-blue-500 underline ml-1"
+                >
+                  Learn more
+                </button>
               </p>
-            </div>
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setShowDetails(true)}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Cookie Settings
-              </button>
-              <button 
-                onClick={onDecline}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Decline
-              </button>
-              <button 
-                onClick={onAccept}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                Accept All
-              </button>
-            </div>
+            ) : (
+              <div className="text-gray-600 text-sm">
+                <p className="mb-2">
+                  We use different types of cookies to optimize your experience on our website:
+                </p>
+                <ul className="list-disc pl-5 mb-2">
+                  <li><strong>Essential cookies:</strong> Necessary for basic website functionality.</li>
+                  <li><strong>Analytics cookies:</strong> Help us understand how you interact with our website.</li>
+                  <li><strong>Marketing cookies:</strong> Allow us to provide relevant content based on your interests.</li>
+                </ul>
+                <button 
+                  onClick={() => setShowDetails(false)}
+                  className="text-blue-500 underline"
+                >
+                  Show less
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Cookie Settings</h3>
-            <div className="space-y-4">
-              <div className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h4 className="font-medium">Essential Cookies</h4>
-                    <p className="text-sm text-gray-500">These cookies are necessary for the website to function properly.</p>
-                  </div>
-                  <div className="bg-gray-200 px-2 py-1 rounded text-xs">Always Active</div>
-                </div>
-              </div>
-              
-              <div className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h4 className="font-medium">Analytics Cookies</h4>
-                    <p className="text-sm text-gray-500">These cookies help us understand how visitors interact with our website.</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" defaultChecked />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                  </label>
-                </div>
-              </div>
-              
-              <div className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h4 className="font-medium">Marketing Cookies</h4>
-                    <p className="text-sm text-gray-500">These cookies are used to track visitors across websites to display relevant advertisements.</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                  </label>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex justify-end gap-3">
-              <button 
-                onClick={() => setShowDetails(false)}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Back
-              </button>
-              <button 
-                onClick={onDecline}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Decline All
-              </button>
-              <button 
-                onClick={onAccept}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                Accept Selected
-              </button>
-            </div>
+          <div className="flex gap-2">
+            <button
+              onClick={onDecline}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
+            >
+              Decline
+            </button>
+            <button
+              onClick={onAccept}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Accept All
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

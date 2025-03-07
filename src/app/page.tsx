@@ -10,26 +10,18 @@ import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 import CookieConsent from './components/CookieConsent';
 import Head from 'next/head';
 
-interface cookieConsent {
-  id: string;
-  joinId: string;
-  title: string;
-  messages: Message[];
-  lastActive: Date;
-  isPrivate: boolean;
-  userPseudonym: string;
+// Define the interface for CookieConsent props
+interface CookieConsentProps {
+  onAccept: () => void;
+  onDecline: () => void;
 }
-
-
-
-
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('response');
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [cookieConsent, setCookieConsent] = useState(false);
   
-  // Vérifiez si l'utilisateur a déjà accepté les cookies
+  // Check if the user has already accepted cookies
   useEffect(() => {
     const savedConsent = localStorage.getItem('cookieConsent');
     if (savedConsent) {
@@ -37,14 +29,15 @@ export default function Home() {
     }
   }, []);
 
-  const handleCookieConsent = (accepted) => {
+  // Fix: Explicitly type the parameter as boolean
+  const handleCookieConsent = (accepted: boolean): void => {
     setCookieConsent(accepted);
     localStorage.setItem('cookieConsent', JSON.stringify(accepted));
     
-    // Si l'utilisateur a accepté, vous pouvez initialiser vos services d'analyse, etc.
+    // If user accepted, initialize analytics services, etc.
     if (accepted) {
-      // Initialiser les services d'analyse ou autres cookies
-      console.log('Cookies acceptés, initialisation des services');
+      // Initialize analytics services or other cookies
+      console.log('Cookies accepted, initializing services');
     }
   };
 
@@ -85,7 +78,12 @@ export default function Home() {
                   <p className="text-sm text-gray-500">Help us improve our service</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" checked={cookieConsent} onChange={(e) => handleCookieConsent(e.target.checked)} />
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer" 
+                    checked={cookieConsent} 
+                    onChange={(e) => handleCookieConsent(e.target.checked)} 
+                  />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                 </label>
               </div>
@@ -174,14 +172,17 @@ export default function Home() {
         </footer>
       </main>
 
-      {/* Modal pour la politique de confidentialité */}
+      {/* Privacy Policy Modal */}
       {showPrivacyModal && (
         <PrivacyPolicyModal onClose={() => setShowPrivacyModal(false)} />
       )}
 
-      {/* Bannière de consentement aux cookies */}
+      {/* Cookie Consent Banner */}
       {!cookieConsent && (
-        <CookieConsent onAccept={() => handleCookieConsent(true)} onDecline={() => handleCookieConsent(false)} />
+        <CookieConsent 
+          onAccept={() => handleCookieConsent(true)} 
+          onDecline={() => handleCookieConsent(false)} 
+        />
       )}
     </>
   );
