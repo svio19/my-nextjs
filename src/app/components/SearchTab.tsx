@@ -2,7 +2,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Clock, BookmarkPlus, Share2, Tag, Lightbulb, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Clock, BookmarkPlus, Share2, Tag, Lightbulb } from 'lucide-react';
+import RecommendationsCarousel from './RecommendationsCarousel';
 
 // Define interfaces for component props
 interface ResponseCardProps {
@@ -20,40 +21,7 @@ const SearchTab = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showThemeInput, setShowThemeInput] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-
-  // Sample recommendation requests - now shorter
-  const recommendations = [
-    // Knowledge & Learning
-    'Teach me something interesting today',
-    'Help me discover a new word',
-    'Explain a complex topic simply',
-    'What are three facts most people don t know?',
-    
-    // Personal Growth
-    'Share a motivational quote for today',
-    'Give me a productivity tip',
-    'Suggest a mindfulness practice',
-    'How can I develop a new habit?',
-    
-    // Creative & Entertainment
-    'Recommend an interesting book to read',
-    'Suggest a podcast worth listening to',
-    'Help me write a better social media bio',
-    'Generate a creative project idea',
-    
-    // Lifestyle
-    'Quick healthy recipe ideas',
-    'Tips for better sleep',
-    'Fun weekend activity suggestions',
-    'How to make my home office more comfortable',
-    
-    // Fun Interactions
-    'Tell me a joke',
-    'Create a fun riddle',
-    'Would you rather questions for friends',
-    'What music matches my current mood?'
-  ];
+  const [lastQuery, setLastQuery] = useState('');
 
   const handleSearch = async () => {
     if (!query.trim()) {
@@ -65,10 +33,12 @@ const SearchTab = () => {
     setResponse('');
     
     try {
-      // Create the search payload with query and optional theme
+      // Créer le payload de recherche avec la requête et le thème optionnel
       const searchPayload: SearchPayload = {
-        message: theme ? `${query} [Theme focus: ${theme}]` : query,
+        message: theme ? `${query} [Thème: ${theme}]` : query,
       };
+      
+      setLastQuery(query);
       
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -101,11 +71,11 @@ const SearchTab = () => {
     setQuery(recommendation);
   };
 
-  // Fixed ResponseCard function component with proper TypeScript interface
+  // ResponseCard component
   const ResponseCard = ({ text }: ResponseCardProps) => (
     <div className="bg-white rounded-lg shadow-md p-4">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Response</h3>
+        <h3 className="text-lg font-semibold">Réponse</h3>
         <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Claude</span>
       </div>
       <div>
@@ -140,7 +110,7 @@ const SearchTab = () => {
                 value={query} 
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Enter your query..." 
+                placeholder="Entrez votre question..." 
                 disabled={loading}
                 className="w-full p-2 pl-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
               />
@@ -163,7 +133,7 @@ const SearchTab = () => {
               ) : (
                 <Search className="w-5 h-5" />
               )}
-              Search
+              Rechercher
             </button>
           </div>
           
@@ -175,7 +145,7 @@ const SearchTab = () => {
                 type="text"
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
-                placeholder="Add a theme to focus the response"
+                placeholder="Ajouter un thème pour orienter la réponse"
                 className="flex-1 p-1 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent text-sm"
                 autoFocus
               />
@@ -183,51 +153,11 @@ const SearchTab = () => {
           )}
         </div>
 
-        {/* Recommendations section */}
-        <div className="mt-1 mb-3">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-1">
-              <Lightbulb size={12} className="text-amber-500" />
-              <span className="text-xs text-gray-500">Try:</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.ceil(recommendations.length / 5) }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentPage(index)}
-                  className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                    currentPage === index ? 'bg-amber-500' : 'bg-gray-200'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {recommendations.slice(currentPage * 5, (currentPage + 1) * 5).map((rec, index) => (
-              <button
-                key={index}
-                onClick={() => handleRecommendationClick(rec)}
-                className="text-xs bg-gray-50 hover:bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full transition-colors"
-              >
-                {rec}
-              </button>
-            ))}
-          </div>
-          <div className="flex justify-between mt-1">
-            <button
-              onClick={() => setCurrentPage(prev => (prev > 0 ? prev - 1 : Math.ceil(recommendations.length / 5) - 1))}
-              className="text-xs text-gray-400 hover:text-gray-600"
-            >
-              <ChevronLeft size={14} />
-            </button>
-            <button
-              onClick={() => setCurrentPage(prev => (prev < Math.ceil(recommendations.length / 5) - 1 ? prev + 1 : 0))}
-              className="text-xs text-gray-400 hover:text-gray-600"
-            >
-              <ChevronRight size={14} />
-            </button>
-          </div>
-        </div>
+        {/* Recommendations component */}
+        <RecommendationsCarousel 
+          onRecommendationClick={handleRecommendationClick} 
+          userQuery={lastQuery}
+        />
       </div>
 
       {error && (
@@ -240,7 +170,7 @@ const SearchTab = () => {
         <ResponseCard text={response} />
       ) : (
         <div className="text-gray-400 text-center py-6 border border-dashed border-gray-200 rounded-lg">
-          <p className="text-sm">Search for something to see results</p>
+          <p className="text-sm">Recherchez quelque chose pour voir les résultats</p>
         </div>
       )}
     </div>
