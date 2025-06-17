@@ -31,7 +31,7 @@ const SearchTab = () => {
   // Premium status state management
   const [premiumStatus, setPremiumStatus] = useState<PremiumStatus>({
     isPremium: false,
-    requestsLimit: 5,
+    requestsLimit: 50000,
     requestsCount: 0
   });
   
@@ -144,7 +144,7 @@ const SearchTab = () => {
   const resetPremiumStatus = () => {
     setPremiumStatus({
       isPremium: false,
-      requestsLimit: 5,
+      requestsLimit: 50000,
       requestsCount: 0
     });
   };
