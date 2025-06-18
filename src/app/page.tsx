@@ -7,6 +7,7 @@ import ContentFeedTab from './components/ContentFeedTab';
 import PrivateChatTab from './components/PrivateChatTab';
 import SearchTab from './components/SearchTab';
 import PrivacyPolicyModal from './components/PrivacyPolicyModal';
+import Letter from './components/Letter';
 import CookieConsent from './components/CookieConsent';
 import Head from 'next/head';
 
@@ -45,9 +46,9 @@ export default function Home() {
     switch (activeTab) {
       case 'response':
         return <SearchTab />;
-      case 'history':
+      case 'Letter':
         return (
-          <p className="text-gray-500 text-center py-8">No search history available</p>
+          <Letter/>
         );
       case 'saved':
         return (
@@ -127,7 +128,7 @@ export default function Home() {
         <div className="flex gap-4 mb-6 overflow-x-auto">
           {[
             { key: 'response', icon: Search, label: 'Search' },
-            { key: 'history', icon: Clock, label: 'History' },
+            { key: 'Letter', icon: Clock, label: 'Letter' },
             { key: 'saved', icon: BookmarkPlus, label: 'Saved' },
             { key: 'journal', icon: BookOpen, label: 'Journal' },
             { key: 'content', icon: Rss, label: 'Content' },
